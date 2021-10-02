@@ -25,9 +25,8 @@ def make(**env_config):
             Ranges between 0 (lowest) and 5 (highest). Defaults to 0.
         env_path: The path to the environment executable. Overrides `watch`. Defaults
             to the provided Soccer-Twos environment.
-        base_port: The base port to use for the environment. Defaults to 50039.
-        worker_id: Used as base port shift to avoid communication conflicts. Defaults
-            to 0.
+        base_port: The base port to use to communicate with the environment. Defaults to 50039.
+        worker_id: Used as base port shift to avoid communication conflicts. Defaults to 0.
     Returns: A multi-agent enabled, gym-friendly Unity environment.
     """
 
