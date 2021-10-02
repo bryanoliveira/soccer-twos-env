@@ -1,10 +1,11 @@
 # CEIA RL Soccer-Twos
 
-A pre-compiled Soccer-Twos ([Unity ML Agents](https://github.com/Unity-Technologies/ml-agents)) environment with a human-friendly visualizer.
+A Soccer-Twos ([Unity ML Agents](https://github.com/Unity-Technologies/ml-agents)) environment with a multi-agent Gym-compatible wrapper and a human-friendly visualizer.
+Pre-compiled versions of this environment are available for Linux, Windows and MacOS (x86, 64 bits). The source code for this environment is available [here](https://github.com/bryanoliveira/unity-soccer).
 
 ## Requirements
 
-See [requirements.txt](requirements.txt)
+See [requirements.txt](requirements.txt).
 
 ## Usage
 
