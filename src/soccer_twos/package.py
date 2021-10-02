@@ -3,18 +3,19 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import stat
 import zipfile
 
 import gdown
 
 if platform.system() == "Linux":
-    TRAINING_ENV_PATH = "./bin/linux.x86_64/soccer-twos/soccer-twos.x86_64"
-    ROLLOUT_ENV_PATH = "./bin/linux.x86_64/watch-soccer-twos/watch-soccer-twos.x86_64"
-    G_ID = "1E56kmsmpZuX0inHuqo18304wQiickYi0"  # linux.x86_64
+    TRAINING_ENV_PATH = "./bin/linux-x86_64/soccer-twos/soccer-twos.x86_64"
+    ROLLOUT_ENV_PATH = "./bin/linux-x86_64/watch-soccer-twos/watch-soccer-twos.x86_64"
+    G_ID = "150nGbjgkAeIr8YfcK-blbZ9P7GYE7bms"  # linux.x86_64
 elif platform.system() == "Windows":
-    TRAINING_ENV_PATH = "./bin/windows.x86_64/soccer-twos/UnityEnvironment.exe"
-    ROLLOUT_ENV_PATH = "./bin/windows.x86_64/watch-soccer-twos/UnityEnvironment.exe"
-    G_ID = "14acVEvaaShltHY3OoyL3dnvXzNMMjgBt"  # windows.x86_64
+    TRAINING_ENV_PATH = "./bin/windows-x86_64/soccer-twos/UnityEnvironment.exe"
+    ROLLOUT_ENV_PATH = "./bin/windows-x86_64/watch-soccer-twos/UnityEnvironment.exe"
+    G_ID = "1fGCMb47Pbvsc2c8veI3CmMh4ieXsuOq1"  # windows.x86_64
 elif platform.system() == "Darwin":
     TRAINING_ENV_PATH = "./bin/mac_os/soccer-twos.app/Contents/MacOS/UnityEnvironment"
     ROLLOUT_ENV_PATH = (
@@ -52,6 +53,16 @@ def check_package():
             os.path.join(__BASE_PATH, "./temp/soccer_twos.zip"), "r"
         ) as zip_ref:
             zip_ref.extractall(os.path.join(__BASE_PATH, "./bin/"))
+
+        try:
+            # try adding execute permissions to the binary
+            st = os.stat(TRAINING_ENV_PATH)
+            os.chmod(TRAINING_ENV_PATH, st.st_mode | stat.S_IEXEC)
+            st = os.stat(ROLLOUT_ENV_PATH)
+            os.chmod(ROLLOUT_ENV_PATH, st.st_mode | stat.S_IEXEC)
+        except Exception as e:
+            logging.warn(e)
+            pass
 
         logging.debug(
             f"Binary envs installed in '{TRAINING_ENV_PATH}' and '{ROLLOUT_ENV_PATH}'"
