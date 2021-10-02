@@ -68,4 +68,4 @@ while True:
         env.reset()
 ```
 
-More information about the environment, including reward functions and observation spaces can be found [here](https://github.com/Unity-Technologies/ml-agents/blob/92ff2c26fef7174b443115454fa1c6045d622bc2/docs/Learning-Environment-Examples.md#soccer-twos).
+More information about the environment including reward functions and observation spaces can be found [here](https://github.com/Unity-Technologies/ml-agents/blob/92ff2c26fef7174b443115454fa1c6045d622bc2/docs/Learning-Environment-Examples.md#soccer-twos).

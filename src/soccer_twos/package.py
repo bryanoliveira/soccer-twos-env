@@ -9,25 +9,25 @@ import zipfile
 import gdown
 
 if platform.system() == "Linux":
-    TRAINING_ENV_PATH = "./bin/linux-x86_64/soccer-twos/soccer-twos.x86_64"
-    ROLLOUT_ENV_PATH = "./bin/linux-x86_64/watch-soccer-twos/watch-soccer-twos.x86_64"
+    TRAINING_ENV_PATH = "linux-x86_64/soccer-twos/soccer-twos.x86_64"
+    ROLLOUT_ENV_PATH = "linux-x86_64/watch-soccer-twos/watch-soccer-twos.x86_64"
     G_ID = "150nGbjgkAeIr8YfcK-blbZ9P7GYE7bms"  # linux.x86_64
 elif platform.system() == "Windows":
-    TRAINING_ENV_PATH = "./bin/windows-x86_64/soccer-twos/UnityEnvironment.exe"
-    ROLLOUT_ENV_PATH = "./bin/windows-x86_64/watch-soccer-twos/UnityEnvironment.exe"
+    TRAINING_ENV_PATH = "windows-x86_64/soccer-twos/UnityEnvironment.exe"
+    ROLLOUT_ENV_PATH = "windows-x86_64/watch-soccer-twos/UnityEnvironment.exe"
     G_ID = "1fGCMb47Pbvsc2c8veI3CmMh4ieXsuOq1"  # windows.x86_64
 elif platform.system() == "Darwin":
-    TRAINING_ENV_PATH = "./bin/mac_os/soccer-twos.app/Contents/MacOS/UnityEnvironment"
-    ROLLOUT_ENV_PATH = (
-        "./bin/mac_os/watch-soccer-twos.app/Contents/MacOS/UnityEnvironment"
-    )
+    TRAINING_ENV_PATH = "mac_os/soccer-twos.app/Contents/MacOS/UnityEnvironment"
+    ROLLOUT_ENV_PATH = "mac_os/watch-soccer-twos.app/Contents/MacOS/UnityEnvironment"
     G_ID = "1fuEkPyr0z0UM5hpe9fLSK8v243CuqJd6"  # mac_os
 else:
     raise Exception("Unsupported OS")
 
-__BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-TRAINING_ENV_PATH = os.path.abspath(os.path.join(__BASE_PATH, TRAINING_ENV_PATH))
-ROLLOUT_ENV_PATH = os.path.abspath(os.path.join(__BASE_PATH, ROLLOUT_ENV_PATH))
+__ENV_VERSION = "v1"
+__CURR_DIR = os.path.dirname(os.path.abspath(__file__))
+__BIN_DIR = os.path.join(__CURR_DIR, "bin", __ENV_VERSION)
+TRAINING_ENV_PATH = os.path.abspath(os.path.join(__BIN_DIR, TRAINING_ENV_PATH))
+ROLLOUT_ENV_PATH = os.path.abspath(os.path.join(__BIN_DIR, ROLLOUT_ENV_PATH))
 
 
 def check_package():
@@ -41,18 +41,18 @@ def check_package():
             f"BINARY ENVS NOT FOUND! DOWNLOADING FOR {platform.system().upper()}..."
         )
 
-        os.makedirs(os.path.join(__BASE_PATH, "./bin"), exist_ok=True)
-        os.makedirs(os.path.join(__BASE_PATH, "./temp"), exist_ok=True)
+        os.makedirs(__BIN_DIR, exist_ok=True)
+        os.makedirs(os.path.join(__CURR_DIR, "temp"), exist_ok=True)
         gdown.download(
             "https://drive.google.com/uc?id=" + G_ID,
-            os.path.join(__BASE_PATH, "./temp/soccer_twos.zip"),
+            os.path.join(__CURR_DIR, "temp/soccer_twos.zip"),
         )
 
         logging.debug("Unzipping...")
         with zipfile.ZipFile(
-            os.path.join(__BASE_PATH, "./temp/soccer_twos.zip"), "r"
+            os.path.join(__CURR_DIR, "temp/soccer_twos.zip"), "r"
         ) as zip_ref:
-            zip_ref.extractall(os.path.join(__BASE_PATH, "./bin/"))
+            zip_ref.extractall(__BIN_DIR)
 
         try:
             # try adding execute permissions to the binary
@@ -69,7 +69,7 @@ def check_package():
         )
 
         logging.debug("Cleaning up...")
-        shutil.rmtree(os.path.join(__BASE_PATH, "./temp"))
+        shutil.rmtree(os.path.join(__CURR_DIR, "./temp"))
 
         logging.debug("Package verification done.")
     else:
