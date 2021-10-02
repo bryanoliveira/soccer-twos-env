@@ -1,1 +1,6 @@
 gdown==3.14.0
+gym==0.19.0
+gym-unity==0.27.0
+mlagents==0.27.0
+mlagents-envs==0.27.0
+numpy==1.19.5

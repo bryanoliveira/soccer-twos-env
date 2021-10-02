@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ray.rllib import MultiAgentEnv
+
 import numpy as np
 import gym
 from gym import spaces
@@ -334,7 +334,3 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
                 and len(terminal_steps) == self.num_groups
             )
         )
-
-
-class RLLibWrapper(gym.core.Wrapper, MultiAgentEnv):
-    pass

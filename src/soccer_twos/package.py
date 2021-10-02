@@ -24,32 +24,41 @@ elif platform.system() == "Darwin":
 else:
     raise Exception("Unsupported OS")
 
-TRAINING_ENV_PATH = os.path.abspath(TRAINING_ENV_PATH)
-TRAINING_ENV_PATH = os.path.abspath(ROLLOUT_ENV_PATH)
+__BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+TRAINING_ENV_PATH = os.path.abspath(os.path.join(__BASE_PATH, TRAINING_ENV_PATH))
+ROLLOUT_ENV_PATH = os.path.abspath(os.path.join(__BASE_PATH, ROLLOUT_ENV_PATH))
 
 
 def check_package():
+    """
+    Checks if the package is installed and, if not, installs it according to the
+    current platform.
+    """
+
     if not Path(TRAINING_ENV_PATH).is_file() and not Path(ROLLOUT_ENV_PATH).is_file():
         logging.info(
             f"BINARY ENVS NOT FOUND! DOWNLOADING FOR {platform.system().upper()}..."
         )
 
-        os.makedirs("./bin", exist_ok=True)
-        os.makedirs("./temp", exist_ok=True)
+        os.makedirs(os.path.join(__BASE_PATH, "./bin"), exist_ok=True)
+        os.makedirs(os.path.join(__BASE_PATH, "./temp"), exist_ok=True)
         gdown.download(
-            "https://drive.google.com/uc?id=" + G_ID, "./temp/soccer_twos.zip"
+            "https://drive.google.com/uc?id=" + G_ID,
+            os.path.join(__BASE_PATH, "./temp/soccer_twos.zip"),
         )
 
         logging.debug("Unzipping...")
-        with zipfile.ZipFile("./temp/soccer_twos.zip", "r") as zip_ref:
-            zip_ref.extractall("./bin/")
+        with zipfile.ZipFile(
+            os.path.join(__BASE_PATH, "./temp/soccer_twos.zip"), "r"
+        ) as zip_ref:
+            zip_ref.extractall(os.path.join(__BASE_PATH, "./bin/"))
 
         logging.debug(
             f"Binary envs installed in '{TRAINING_ENV_PATH}' and '{ROLLOUT_ENV_PATH}'"
         )
 
         logging.debug("Cleaning up...")
-        shutil.rmtree("./temp")
+        shutil.rmtree(os.path.join(__BASE_PATH, "./temp"))
 
         logging.debug("Package verification done.")
     else:
