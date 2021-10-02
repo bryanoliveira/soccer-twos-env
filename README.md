@@ -5,7 +5,7 @@ Pre-compiled versions of this environment are available for Linux, Windows and M
 
 ## Requirements
 
-See [requirements.txt](requirements.txt).
+See [requirements.txt](https://github.com/bryanoliveira/soccer-twos-env/blob/master/requirements.txt).
 
 ## Usage
 
