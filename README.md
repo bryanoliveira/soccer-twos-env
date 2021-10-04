@@ -9,6 +9,8 @@ See [requirements.txt](https://github.com/bryanoliveira/soccer-twos-env/blob/mas
 
 ## Usage
 
+### For training
+
 Import this package and instantiate the environment:
 
 ```
@@ -70,3 +72,10 @@ while True:
 ```
 
 More information about the environment including reward functions and observation spaces can be found [here](https://github.com/Unity-Technologies/ml-agents/blob/92ff2c26fef7174b443115454fa1c6045d622bc2/docs/Learning-Environment-Examples.md#soccer-twos).
+
+### For watching/evaluating
+
+You may implement your own rollout script using `soccer_twos.make(watch=True)` or use our CLI tool.
+To rollout via CLI, you must create an implementation (subclass) of `soccer_twos.AgentInterface` and run `python -m soccer_twos.watch -m agent_module`.
+This will run a human-friendly version of the environment, where your agent will play against itself.
+You may instead run `python -m soccer_twos.watch -m1 agent_module -m2 opponent_module` to play against a different opponent.

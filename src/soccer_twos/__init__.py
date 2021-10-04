@@ -1,3 +1,6 @@
+import logging
+import os
+
 from mlagents_envs.environment import UnityEnvironment
 from mlagents_envs.side_channel.engine_configuration_channel import (
     EngineConfigurationChannel,
@@ -7,6 +10,9 @@ from soccer_twos.agent_interface import AgentInterface
 from soccer_twos.package import check_package, TRAINING_ENV_PATH, ROLLOUT_ENV_PATH
 from soccer_twos.wrappers import MultiAgentUnityWrapper
 
+
+LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+logging.basicConfig(level=LOGLEVEL)
 
 check_package()
 

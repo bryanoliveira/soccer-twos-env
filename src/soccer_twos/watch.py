@@ -2,6 +2,8 @@ import argparse
 import importlib
 import inspect
 import logging
+import os
+import sys
 
 import soccer_twos
 from soccer_twos.agent_interface import AgentInterface
@@ -19,18 +21,28 @@ def get_agent_class(module):
 
 
 if __name__ == "__main__":
+    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+    logging.basicConfig(level=LOGLEVEL)
+
     parser = argparse.ArgumentParser(description="Rollout soccer-twos.")
-    parser.add_argument(
-        "-m1", "--agent1-module", help="Team 1 Agent Module", required=True
-    )
-    parser.add_argument(
-        "-m2", "--agent2-module", help="Team 2 Agent Module", required=True
-    )
+    parser.add_argument("-m", "--agent-module", help="Selfplay Agent Module")
+    parser.add_argument("-m1", "--agent1-module", help="Team 1 Agent Module")
+    parser.add_argument("-m2", "--agent2-module", help="Team 2 Agent Module")
     args = parser.parse_args()
 
+    if args.agent_module:
+        agent1_module_name = args.agent_module
+        agent2_module_name = args.agent_module
+    elif args.agent1_module and args.agent2_module:
+        agent1_module_name = args.agent1_module
+        agent2_module_name = args.agent2_module
+    else:
+        parser.print_help(sys.stderr)
+        raise ValueError("Must specify agent module")
+
     # import agent modules
-    agent1_module = importlib.import_module(args.agent1_module)
-    agent2_module = importlib.import_module(args.agent2_module)
+    agent1_module = importlib.import_module(agent1_module_name)
+    agent2_module = importlib.import_module(agent2_module_name)
     # instantiate env so agents can access e.g. env.action_space.shape
     env = soccer_twos.make()
     agent1 = get_agent_class(agent1_module)(env)
