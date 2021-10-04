@@ -3,7 +3,7 @@
 A Soccer-Twos ([Unity ML Agents](https://github.com/Unity-Technologies/ml-agents)) environment with a multi-agent Gym-compatible wrapper and a human-friendly visualizer.
 
 <div align="center">
-    <img src="https://github.com/bryanlincoln/soccer-twos-env/raw/master/images/screenshot.png" width="480"/>
+    <img src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/master/images/screenshot.png" width="480"/>
 </div>
 <br/>
 
