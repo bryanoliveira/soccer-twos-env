@@ -1,16 +1,19 @@
 import abc
-from typing import Any, Dict, Tuple
+from typing import Dict
 
 import numpy as np
 
 
 class AgentInterface(abc.ABC):
     @abc.abstractmethod
-    def act(self, observation: Dict[int, np.ndarray]) -> np.ndarray:
+    def act(self, observation: Dict[int, np.ndarray]) -> Dict[int, np.ndarray]:
         """The act method is called when the agent is asked to act.
         Args:
-            observation: the observation of the environment.
+            observation: a dictionary where keys are team member ids and
+                values are their corresponding observations of the environment,
+                as numpy arrays.
         Returns:
-            action: np.array representing the action to be taken.
+            action: a dictionary where keys are team member ids and values
+                are their corresponding actions, as np.arrays.
         """
         raise NotImplementedError
