@@ -38,7 +38,7 @@ if __name__ == "__main__":
         agent2_module_name = args.agent2_module
     else:
         parser.print_help(sys.stderr)
-        raise ValueError("Must specify agent module")
+        raise ValueError("Must specify selfplay (-m) or team (-m1, -m2) agent modules")
 
     # import agent modules
     agent1_module = importlib.import_module(agent1_module_name)
