@@ -1,6 +1,12 @@
 # CEIA RL Soccer-Twos
 
 A Soccer-Twos ([Unity ML Agents](https://github.com/Unity-Technologies/ml-agents)) environment with a multi-agent Gym-compatible wrapper and a human-friendly visualizer.
+
+<div align="center">
+    <img src="https://github.com/bryanlincoln/soccer-twos-env/raw/master/images/screenshot.png" width="480"/>
+</div>
+<br/>
+
 Pre-compiled versions of this environment are available for Linux, Windows and MacOS (x86, 64 bits). The source code for this environment is available [here](https://github.com/bryanoliveira/unity-soccer).
 
 ## Requirements
