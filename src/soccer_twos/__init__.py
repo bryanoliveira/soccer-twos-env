@@ -6,9 +6,14 @@ from mlagents_envs.side_channel.engine_configuration_channel import (
     EngineConfigurationChannel,
 )
 
-from soccer_twos.agent_interface import AgentInterface
+from soccer_twos.agent_interface import AgentInterface  # expose
 from soccer_twos.package import check_package, TRAINING_ENV_PATH, ROLLOUT_ENV_PATH
-from soccer_twos.wrappers import MultiAgentUnityWrapper
+from soccer_twos.wrappers import (
+    MultiAgentUnityWrapper,
+    MultiagentTeamWrapper,
+    TeamVsPolicyWrapper,
+    EnvType,
+)
 
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
@@ -26,6 +31,7 @@ def make(**env_config):
         watch: Whether to run an audience-friendly version the provided
             Soccer-Twos environment. Forces `render` to True, `time_scale` to 1 and
             `quality_level` to 5. Has no effect when `env_path` is set. Defaults to False.
+        variation: A soccer env variation in EnvType. Defaults to `EnvType.multiagent_player`.
         time_scale: The time scale to use for the environment. This should be less
             than 100x for better simulation accuracy. Defaults to 20x realtime.
         quality_level: The quality level to use when rendering the environment.
@@ -64,4 +70,23 @@ def make(**env_config):
         side_channels=[channel],
     )
 
-    return MultiAgentUnityWrapper(unity_env)
+    env = MultiAgentUnityWrapper(unity_env)
+
+    if "variation" in env_config:
+        if env_config["variation"] == EnvType.multiagent_player:
+            return env
+        elif env_config["variation"] == EnvType.multiagent_team:
+            return MultiagentTeamWrapper(env)
+        elif env_config["variation"] == EnvType.team_vs_policy:
+            return TeamVsPolicyWrapper(
+                env,
+                env_config["opponent_policy"]
+                if "opponent_policy" in env_config
+                else None,
+            )
+        else:
+            raise ValueError(
+                "variation parameter invalid. Must be a EnvType member: ",
+                [e.value for e in EnvType],
+            )
+    return env
