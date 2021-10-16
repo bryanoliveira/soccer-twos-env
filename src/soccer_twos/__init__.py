@@ -70,7 +70,18 @@ def make(**env_config):
         side_channels=[channel],
     )
 
-    env = MultiAgentUnityWrapper(unity_env)
+    multiagent_config = {
+        k: env_config[k]
+        for k in [
+            "allow_multiple_obs",
+            "uint8_visual",
+            "flatten_branched",
+            "action_space_seed",
+            "termination_mode",
+        ]
+        if k in env_config
+    }
+    env = MultiAgentUnityWrapper(unity_env, **multiagent_config)
 
     if "variation" in env_config:
         if env_config["variation"] == EnvType.multiagent_player:
