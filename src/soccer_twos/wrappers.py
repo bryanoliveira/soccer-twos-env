@@ -355,10 +355,16 @@ class MultiagentTeamWrapper(gym.core.Wrapper):
         self.observation_space = gym.spaces.Box(
             0, 1, dtype=np.float32, shape=(env.observation_space.shape[0] * 2,)
         )
-        self.action_space = gym.spaces.MultiDiscrete(
-            np.repeat(env.action_space.nvec, 2)
-        )
-        self.action_space_n = len(env.action_space.nvec)
+        if isinstance(env.action_space, gym.spaces.Discrete):
+            self.action_space = gym.spaces.Discrete(env.action_space.n * 2)
+            self.action_space_n = env.action_space.n
+        elif isinstance(env.action_space, gym.spaces.MultiDiscrete):
+            self.action_space = gym.spaces.MultiDiscrete(
+                np.repeat(env.action_space.nvec, 2)
+            )
+            self.action_space_n = len(env.action_space.nvec)
+        else:
+            raise ValueError("Unsupported action space type")
 
     def step(self, action):
         action = {
@@ -403,10 +409,14 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
         self.observation_space = gym.spaces.Box(
             0, 1, dtype=np.float32, shape=(env.observation_space.shape[0] * 2,)
         )
-        self.action_space = gym.spaces.MultiDiscrete(
-            np.repeat(env.action_space.nvec, 2)
-        )
-        self.action_space_n = len(env.action_space.nvec)
+        if isinstance(env.action_space, gym.spaces.Discrete):
+            self.action_space = gym.spaces.Discrete(env.action_space.n * 2)
+            self.action_space_n = env.action_space.n
+        elif isinstance(env.action_space, gym.spaces.MultiDiscrete):
+            self.action_space = gym.spaces.MultiDiscrete(
+                np.repeat(env.action_space.nvec, 2)
+            )
+            self.action_space_n = len(env.action_space.nvec)
 
         if opponent is None:
             # a function that returns random actions no matter the input
