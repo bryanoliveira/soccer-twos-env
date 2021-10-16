@@ -367,15 +367,25 @@ class MultiagentTeamWrapper(gym.core.Wrapper):
             raise ValueError("Unsupported action space type")
 
     def step(self, action):
-        action = {
-            # slice actions for team 1
-            0: action[0][: self.action_space_n],
-            1: action[0][self.action_space_n :],
-            # slice actions for team 2
-            2: action[1][: self.action_space_n],
-            3: action[1][self.action_space_n :],
-        }
-        obs, reward, done, info = self.env.step(action)
+        if isinstance(self.action_space, gym.spaces.Discrete):
+            env_action = {
+                # actions for team 1
+                0: action[0] % self.action_space_n,
+                1: max(action[0] - self.action_space_n, 0),
+                # actions for team 2
+                2: action[1] % self.action_space_n,
+                3: max(action[1] - self.action_space_n, 0),
+            }
+        else:
+            env_action = {
+                # slice actions for team 1
+                0: action[0][: self.action_space_n],
+                1: action[0][self.action_space_n :],
+                # slice actions for team 2
+                2: action[1][: self.action_space_n],
+                3: action[1][self.action_space_n :],
+            }
+        obs, reward, done, info = self.env.step(env_action)
         return self._preprocess_obs(obs), self._preprocess_reward(reward), done, info
 
     def reset(self):
@@ -427,15 +437,19 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
         self.last_obs = None
 
     def step(self, action):
-        action = {
-            # slice actions for team 1
-            0: action[: self.action_space_n],
-            1: action[self.action_space_n :],
-            # slice actions for team 2
+        env_action = {
+            # actions for team 2
             2: self.opponent(self.last_obs[2]),
             3: self.opponent(self.last_obs[3]),
         }
-        obs, reward, done, info = self.env.step(action)
+        if isinstance(self.action_space, gym.spaces.Discrete):
+            env_action[0] = action % self.action_space_n
+            env_action[1] = max(action - self.action_space_n, 0)
+        else:
+            env_action[0] = action[: self.action_space_n]
+            env_action[1] = action[self.action_space_n :]
+
+        obs, reward, done, info = self.env.step(env_action)
         return self._preprocess_obs(obs), self._preprocess_reward(reward), done, info
 
     def reset(self):
