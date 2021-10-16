@@ -13,6 +13,7 @@ from soccer_twos.wrappers import (
     MultiagentTeamWrapper,
     TeamVsPolicyWrapper,
     EnvType,
+    TerminationMode,
 )
 
 
@@ -40,6 +41,13 @@ def make(**env_config):
             to the provided Soccer-Twos environment.
         base_port: The base port to use to communicate with the environment. Defaults to 50039.
         worker_id: Used as base port shift to avoid communication conflicts. Defaults to 0.
+        flatten_branched: If True, turn branched discrete action spaces into a Discrete space
+            rather than MultiDiscrete. Defaults to False.
+        uint8_visual: Return visual observations as uint8 (0-255) matrices instead of float (0.0-1.0).
+        action_space_seed: If non-None, will be used to set the random seed on created gym.Space
+            instances. Defaults to None.
+        termination_mode: A string (enum) suggesting when to end an episode. Supports "ANY", "MAJORITY"
+            and "ALL" which are atributes on `TerminationMode`. Defaults to TerminationMode.ANY.
     Returns: A multi-agent enabled, gym-friendly Unity environment.
     """
 
@@ -73,7 +81,6 @@ def make(**env_config):
     multiagent_config = {
         k: env_config[k]
         for k in [
-            "allow_multiple_obs",
             "uint8_visual",
             "flatten_branched",
             "action_space_seed",
