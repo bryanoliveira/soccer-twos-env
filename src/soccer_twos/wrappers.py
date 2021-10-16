@@ -278,24 +278,24 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
         info = {"step": info}
         return observations, rewards, done, info
 
-    def _set_action(self, action: List[Any], group_name: str) -> None:
-        """Sets the action for an group within the environment.
+    def _set_action(self, actions: List[Any], group_name: str) -> None:
+        """Sets the actions for an group within the environment.
         Args:
-            action (list): the action to take
-            group_name (str): the name of the group to set the action for
+            actions (list): the actions to take
+            group_name (str): the name of the group to set the actions for
         """
 
         if self._flattener is not None:
-            # Translate action into list
-            action = self._flattener.lookup_action(action)
+            # unflatten actions
+            actions = [self._flattener.lookup_action(action) for action in actions]
 
-        action = np.array(action).reshape((-1, self.action_size))
+        actions = np.array(actions).reshape((-1, self.action_size))
 
         action_tuple = ActionTuple()
         if self.group_spec.action_spec.is_continuous():
-            action_tuple.add_continuous(action)
+            action_tuple.add_continuous(actions)
         else:
-            action_tuple.add_discrete(action)
+            action_tuple.add_discrete(actions)
 
         self._env.set_actions(group_name, action_tuple)
 
