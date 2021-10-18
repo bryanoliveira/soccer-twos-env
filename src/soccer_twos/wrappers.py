@@ -450,7 +450,13 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
             env_action[1] = action[self.action_space_n :]
 
         obs, reward, done, info = self.env.step(env_action)
-        return self._preprocess_obs(obs), self._preprocess_reward(reward), done, info
+
+        return (
+            self._preprocess_obs(obs),
+            reward[0] + reward[1],
+            done["__all__"],
+            info[0],
+        )
 
     def reset(self):
         return self._preprocess_obs(self.env.reset())
@@ -458,6 +464,3 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
     def _preprocess_obs(self, obs):
         self.last_obs = obs
         return np.concatenate((obs[0], obs[1]))
-
-    def _preprocess_reward(self, reward):
-        return reward[0] + reward[1]
