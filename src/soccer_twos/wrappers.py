@@ -356,7 +356,7 @@ class MultiagentTeamWrapper(gym.core.Wrapper):
             0, 1, dtype=np.float32, shape=(env.observation_space.shape[0] * 2,)
         )
         if isinstance(env.action_space, gym.spaces.Discrete):
-            self.action_space = gym.spaces.Discrete(env.action_space.n * 2)
+            self.action_space = gym.spaces.Discrete(env.action_space.n ** 2)
             self.action_space_n = env.action_space.n
         elif isinstance(env.action_space, gym.spaces.MultiDiscrete):
             self.action_space = gym.spaces.MultiDiscrete(
@@ -370,11 +370,11 @@ class MultiagentTeamWrapper(gym.core.Wrapper):
         if isinstance(self.action_space, gym.spaces.Discrete):
             env_action = {
                 # actions for team 1
-                0: action[0] % self.action_space_n,
-                1: max(action[0] - self.action_space_n, 0),
+                0: action[0] // self.action_space_n,
+                1: action[0] % self.action_space_n,
                 # actions for team 2
-                2: action[1] % self.action_space_n,
-                3: max(action[1] - self.action_space_n, 0),
+                2: action[1] // self.action_space_n,
+                3: action[1] % self.action_space_n,
             }
         else:
             env_action = {
@@ -411,16 +411,21 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
     Uses a 2x2 (4 players) environment to expose a 1x1 (2 teams) environment.
     """
 
-    def __init__(self, env, opponent: Callable = None):
+    def __init__(self, env, opponent: Callable = None, single_player: bool = False):
         super(TeamVsPolicyWrapper, self).__init__(env)
         self.env = env
-
+        self.single_player = single_player
         # duplicate obs & action spaces
         self.observation_space = gym.spaces.Box(
-            0, 1, dtype=np.float32, shape=(env.observation_space.shape[0] * 2,)
+            0,
+            1,
+            dtype=np.float32,
+            shape=(env.observation_space.shape[0] * (1 if single_player else 2),),
         )
         if isinstance(env.action_space, gym.spaces.Discrete):
-            self.action_space = gym.spaces.Discrete(env.action_space.n * 2)
+            self.action_space = gym.spaces.Discrete(
+                env.action_space.n ** (1 if single_player else 2)
+            )
             self.action_space_n = env.action_space.n
         elif isinstance(env.action_space, gym.spaces.MultiDiscrete):
             self.action_space = gym.spaces.MultiDiscrete(
@@ -443,8 +448,12 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
             3: self.opponent(self.last_obs[3]),
         }
         if isinstance(self.action_space, gym.spaces.Discrete):
-            env_action[0] = action % self.action_space_n
-            env_action[1] = max(action - self.action_space_n, 0)
+            if self.single_player:
+                env_action[0] = action
+                env_action[1] = 0
+            else:
+                env_action[0] = action // self.action_space_n
+                env_action[1] = action % self.action_space_n
         else:
             env_action[0] = action[: self.action_space_n]
             env_action[1] = action[self.action_space_n :]
@@ -463,4 +472,7 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
 
     def _preprocess_obs(self, obs):
         self.last_obs = obs
-        return np.concatenate((obs[0], obs[1]))
+        if self.single_player:
+            return obs[0]
+        else:
+            return np.concatenate((obs[0], obs[1]))

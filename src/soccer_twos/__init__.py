@@ -43,6 +43,10 @@ def make(**env_config):
         worker_id: Used as base port shift to avoid communication conflicts. Defaults to 0.
         flatten_branched: If True, turn branched discrete action spaces into a Discrete space
             rather than MultiDiscrete. Defaults to False.
+        opponent_policy: The policy to use for the opponent when `variation==team_vs_policy`.
+            Defaults to a random agent.
+        single_player: Whether to let the agent control a single player, while the other stays still.
+            Only works when `variation==team_vs_policy`. Defaults to False.
         uint8_visual: Return visual observations as uint8 (0-255) matrices instead of float (0.0-1.0).
         action_space_seed: If non-None, will be used to set the random seed on created gym.Space
             instances. Defaults to None.
@@ -91,20 +95,25 @@ def make(**env_config):
     env = MultiAgentUnityWrapper(unity_env, **multiagent_config)
 
     if "variation" in env_config:
-        if env_config["variation"] == EnvType.multiagent_player:
+        if EnvType(env_config["variation"]) is EnvType.multiagent_player:
             return env
-        elif env_config["variation"] == EnvType.multiagent_team:
+        elif EnvType(env_config["variation"]) is EnvType.multiagent_team:
             return MultiagentTeamWrapper(env)
-        elif env_config["variation"] == EnvType.team_vs_policy:
+        elif EnvType(env_config["variation"]) is EnvType.team_vs_policy:
             return TeamVsPolicyWrapper(
                 env,
-                env_config["opponent_policy"]
+                opponent=env_config["opponent_policy"]
                 if "opponent_policy" in env_config
                 else None,
+                single_player=env_config["single_player"]
+                if "single_player" in env_config
+                else False,
             )
         else:
             raise ValueError(
-                "variation parameter invalid. Must be a EnvType member: ",
-                [e.value for e in EnvType],
+                "Variation parameter invalid. Must be an EnvType member: "
+                + str([e.value for e in EnvType])
+                + ". Received "
+                + env_config["variation"]
             )
     return env
