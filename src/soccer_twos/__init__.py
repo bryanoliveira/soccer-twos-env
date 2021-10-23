@@ -15,6 +15,7 @@ from soccer_twos.wrappers import (
     EnvType,
     TerminationMode,
 )
+from soccer_twos.utils import DummyEnv
 
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
