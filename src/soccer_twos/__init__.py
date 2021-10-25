@@ -71,8 +71,6 @@ def make(**env_config):
     channel.set_configuration_parameters(
         time_scale=env_config.get("time_scale", 20),  # 20x speedup
         quality_level=env_config.get("quality_level", 0),  # lowest
-        target_frame_rate=-1,  # unbounded
-        capture_frame_rate=60,  # 60 fps
     )
 
     unity_env = UnityEnvironment(
