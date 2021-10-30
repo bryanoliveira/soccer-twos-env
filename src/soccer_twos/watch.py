@@ -28,6 +28,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--agent-module", help="Selfplay Agent Module")
     parser.add_argument("-m1", "--agent1-module", help="Team 1 Agent Module")
     parser.add_argument("-m2", "--agent2-module", help="Team 2 Agent Module")
+    parser.add_argument("-p", "--base-port", type=int, help="Base Communication Port")
     args = parser.parse_args()
 
     if args.agent_module:
@@ -44,12 +45,12 @@ if __name__ == "__main__":
     agent1_module = importlib.import_module(agent1_module_name)
     agent2_module = importlib.import_module(agent2_module_name)
     # instantiate env so agents can access e.g. env.action_space.shape
-    env = soccer_twos.make()
+    env = soccer_twos.make(base_port=args.base_port)
     agent1 = get_agent_class(agent1_module)(env)
     agent2 = get_agent_class(agent2_module)(env)
     env.close()
     # setup & run
-    env = soccer_twos.make(watch=True)
+    env = soccer_twos.make(watch=True, base_port=args.base_port)
     obs = env.reset()
     team0_reward = 0
     team1_reward = 0
