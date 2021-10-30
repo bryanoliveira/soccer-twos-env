@@ -44,6 +44,8 @@ The `make` method accepts several options:
 The created `env` exposes a basic [Gym](https://gym.openai.com/) interface.
 Namely, the methods `reset()`, `step(action: Dict[int, np.ndarray])` and `close()` are available.
 The `render()` method has currently no effect and `soccer_twos.make(render=True)` should be used instead.
+The `step()` method returns extra information about the player and the ball in the last tuple element. 
+This information may be used to build custom reward functions if needed.
 
 We expose an RLLib-compatible multiagent interface.
 This means, for example, that `action` should be a `dict` where keys are integers in `{0, 1, 2, 3}` corresponding to each agent.
