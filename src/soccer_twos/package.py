@@ -23,7 +23,7 @@ elif platform.system() == "Darwin":
 else:
     raise Exception("Unsupported OS")
 
-__ENV_VERSION = "v1"
+__ENV_VERSION = "v2"
 __CURR_DIR = os.path.dirname(os.path.abspath(__file__))
 __BIN_DIR = os.path.join(__CURR_DIR, "bin", __ENV_VERSION)
 TRAINING_ENV_PATH = os.path.abspath(os.path.join(__BIN_DIR, TRAINING_ENV_PATH))
