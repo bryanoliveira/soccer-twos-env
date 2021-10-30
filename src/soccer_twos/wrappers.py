@@ -281,17 +281,19 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
         for member_id in observations:
             _obs = observations[member_id]
             observations[member_id] = _obs[:336]
-            info[member_id] = {
-                "player_info": {
-                    "position": _obs[336:338],
-                    "rotation": _obs[338:339],
-                    "velocity": _obs[339:341],
-                },
-                "ball_info": {
-                    "position": _obs[341:343],
-                    "velocity": _obs[343:345],
-                },
-            }
+            if len(_obs) == 345:
+                # binary env sent extra info
+                info[member_id] = {
+                    "player_info": {
+                        "position": _obs[336:338],
+                        "rotation_y": _obs[338],
+                        "velocity": _obs[339:341],
+                    },
+                    "ball_info": {
+                        "position": _obs[341:343],
+                        "velocity": _obs[343:345],
+                    },
+                }
 
         return observations, rewards, done, info
 
