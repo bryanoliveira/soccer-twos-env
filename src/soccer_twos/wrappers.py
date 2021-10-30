@@ -238,9 +238,9 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
                 for member_id in o:
                     obs_dict[group_id * len(o) + member_id] = o[member_id]
                     rew_dict[group_id * len(o) + member_id] = r[member_id]
-                # done and info uses team-wise info
+                    info_dict[group_id * len(o) + member_id] = i[member_id]
+                # done uses team-wise info
                 done = done or d
-                info_dict[group_id] = i
             done_dict = {"__all__": done}
             return obs_dict, rew_dict, done_dict, info_dict
         else:
@@ -275,7 +275,24 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
             i: info.reward[i] + info.group_reward[i] for i in range(len(info.reward))
         }
         done = isinstance(info, TerminalSteps)
-        info = {"step": info}
+        info = {}
+
+        # specific for soccer-twos: ray observations, player info, ball info
+        for member_id in observations:
+            _obs = observations[member_id]
+            observations[member_id] = _obs[:336]
+            info[member_id] = {
+                "player_info": {
+                    "position": _obs[336:338],
+                    "rotation": _obs[338:339],
+                    "velocity": _obs[339:341],
+                },
+                "ball_info": {
+                    "position": _obs[341:343],
+                    "velocity": _obs[343:345],
+                },
+            }
+
         return observations, rewards, done, info
 
     def _set_action(self, actions: List[Any], group_name: str) -> None:
@@ -415,6 +432,8 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
         super(TeamVsPolicyWrapper, self).__init__(env)
         self.env = env
         self.single_player = single_player
+        self.last_obs = None
+
         # duplicate obs & action spaces
         self.observation_space = gym.spaces.Box(
             0,
@@ -423,11 +442,13 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
             shape=(env.observation_space.shape[0] * (1 if single_player else 2),),
         )
         if isinstance(env.action_space, gym.spaces.Discrete):
+            # every combination of actions for both players
             self.action_space = gym.spaces.Discrete(
                 env.action_space.n ** (1 if single_player else 2)
             )
             self.action_space_n = env.action_space.n
         elif isinstance(env.action_space, gym.spaces.MultiDiscrete):
+            self.single_player = False  # disable single_player when using MultiDiscrete
             self.action_space = gym.spaces.MultiDiscrete(
                 np.repeat(env.action_space.nvec, 2)
             )
@@ -438,8 +459,6 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
             self.opponent = lambda *_: self.env.action_space.sample()
         else:
             self.opponent = opponent
-
-        self.last_obs = None
 
     def step(self, action):
         env_action = {
