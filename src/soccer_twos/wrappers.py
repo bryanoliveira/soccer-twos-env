@@ -53,6 +53,7 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
         flatten_branched: bool = False,
         action_space_seed: Optional[int] = None,
         termination_mode: str = TerminationMode.ANY,
+        soccer_twos_only: bool = True,
     ):
         """
         Environment initialization
@@ -162,9 +163,18 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
             )
             list_spaces.append(vec_space)
 
-        self._observation_space = (
-            spaces.Tuple(list_spaces) if len(list_spaces) > 1 else list_spaces[0]
-        )
+        self.soccer_twos_only = soccer_twos_only
+        if soccer_twos_only:
+            self._observation_space = spaces.Box(
+                -np.inf,
+                np.inf,
+                dtype=np.float32,
+                shape=(336,),  # hardcoded for compiled env
+            )
+        else:
+            self._observation_space = (
+                spaces.Tuple(list_spaces) if len(list_spaces) > 1 else list_spaces[0]
+            )
 
     def reset(self) -> Union[Dict[int, np.ndarray], np.ndarray]:
         """Resets the state of the environment and returns an initial observation.
@@ -278,22 +288,23 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
         info = {}
 
         # specific for soccer-twos: ray observations, player info, ball info
-        for member_id in observations:
-            _obs = observations[member_id]
-            observations[member_id] = _obs[:336]
-            if len(_obs) == 345:
-                # binary env sent extra info
-                info[member_id] = {
-                    "player_info": {
-                        "position": _obs[336:338],
-                        "rotation_y": _obs[338],
-                        "velocity": _obs[339:341],
-                    },
-                    "ball_info": {
-                        "position": _obs[341:343],
-                        "velocity": _obs[343:345],
-                    },
-                }
+        if self.soccer_twos_only:
+            for member_id in observations:
+                _obs = observations[member_id]
+                observations[member_id] = _obs[:336]
+                if len(_obs) == 345:
+                    # binary env sent extra info
+                    info[member_id] = {
+                        "player_info": {
+                            "position": _obs[336:338],
+                            "rotation_y": _obs[338],
+                            "velocity": _obs[339:341],
+                        },
+                        "ball_info": {
+                            "position": _obs[341:343],
+                            "velocity": _obs[343:345],
+                        },
+                    }
 
         return observations, rewards, done, info
 
