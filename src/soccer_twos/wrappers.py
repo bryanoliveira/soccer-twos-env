@@ -19,12 +19,24 @@ class EnvType(Enum):
     multiagent_team = "multiagent_team"
     team_vs_policy = "team_vs_policy"
 
-
 class TerminationMode:
     ALL = "ALL"
     ANY = "ANY"
     MAJORITY = "MAJORITY"
 
+OBSERVATION_SECTIONS = {
+    "OBS_SIZE": 336,
+    "AGENT_OBS_SLICE": slice(336),
+    "PLAYER_INFO": {
+        "POSITION": slice(336, 338),
+        "ROTATION_Y": slice(338, 339),
+        "VELOCITY": slice(339, 341)
+    },
+    "BALL_INFO": {
+        "POSITION": slice(341, 343),
+        "VELOCITY": slice(343, 345)
+    }
+}
 
 class MultiAgentUnityWrapper(UnityToGymWrapper):
     """An implementation of the UnityToGymWrapper that supports multi-agent environments.
@@ -158,7 +170,7 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
         if self._get_vec_obs_size() > 0:
             self._has_vec_obs = True
             vec_space = spaces.Box(
-                -np.inf, np.inf, dtype=np.float32, shape=(self._get_vec_obs_size(),)
+                -np.inf, np.inf, dtype=np.float32, shape=((OBSERVATION_SECTIONS["OBS_SIZE"],))
             )
             list_spaces.append(vec_space)
 
@@ -280,18 +292,18 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
         # specific for soccer-twos: ray observations, player info, ball info
         for member_id in observations:
             _obs = observations[member_id]
-            observations[member_id] = _obs[:336]
+            observations[member_id] = _obs[OBSERVATION_SECTIONS["AGENT_OBS_SLICE"]]
             if len(_obs) == 345:
                 # binary env sent extra info
                 info[member_id] = {
                     "player_info": {
-                        "position": _obs[336:338],
-                        "rotation_y": _obs[338],
-                        "velocity": _obs[339:341],
+                        "position": _obs[OBSERVATION_SECTIONS["PLAYER_INFO"]["POSITION"]],
+                        "rotation_y": _obs[OBSERVATION_SECTIONS["PLAYER_INFO"]["ROTATION_Y"]],
+                        "velocity": _obs[OBSERVATION_SECTIONS["PLAYER_INFO"]["VELOCITY"]],
                     },
                     "ball_info": {
-                        "position": _obs[341:343],
-                        "velocity": _obs[343:345],
+                        "position": _obs[OBSERVATION_SECTIONS["PLAYER_INFO"]["POSITION"]],
+                        "velocity": _obs[OBSERVATION_SECTIONS["PLAYER_INFO"]["VELOCITY"]],
                     },
                 }
 
@@ -372,7 +384,7 @@ class MultiagentTeamWrapper(gym.core.Wrapper):
         self.env = env
         # duplicate obs & action spaces (concatenate players)
         self.observation_space = gym.spaces.Box(
-            0, 1, dtype=np.float32, shape=(env.observation_space.shape[0] * 2,)
+            0, 1, dtype=np.float32, shape=(OBSERVATION_SECTIONS["OBS_SIZE"] * 2,)
         )
         if isinstance(env.action_space, gym.spaces.Discrete):
             self.action_space = gym.spaces.Discrete(env.action_space.n ** 2)
@@ -441,7 +453,7 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
             0,
             1,
             dtype=np.float32,
-            shape=(env.observation_space.shape[0] * (1 if single_player else 2),),
+            shape=(OBSERVATION_SECTIONS["OBS_SIZE"] * (1 if single_player else 2),),
         )
         if isinstance(env.action_space, gym.spaces.Discrete):
             # every combination of actions for both players
