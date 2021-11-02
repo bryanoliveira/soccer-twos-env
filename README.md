@@ -1,6 +1,6 @@
 # CEIA RL Soccer-Twos
 
-A Soccer-Twos ([Unity ML Agents](https://github.com/Unity-Technologies/ml-agents)) environment with a multi-agent Gym-compatible wrapper and a human-friendly visualizer.
+A Soccer-Twos ([Unity ML Agents](https://github.com/Unity-Technologies/ml-agents)) environment with multi-agent Gym-compatible wrappers and a human-friendly visualizer.
 
 <div align="center">
     <img src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/master/images/screenshot.png" width="480"/>
@@ -85,7 +85,7 @@ while True:
 
 More information about the environment including reward functions and observation spaces can be found [here](https://github.com/Unity-Technologies/ml-agents/blob/92ff2c26fef7174b443115454fa1c6045d622bc2/docs/Learning-Environment-Examples.md#soccer-twos).
 
-### For watching/evaluating
+### Watching / evaluating
 
 You may implement your own rollout script using `soccer_twos.make(watch=True)` or use our CLI tool.
 To rollout via CLI, you must create an implementation (subclass) of `soccer_twos.AgentInterface` and run `python -m soccer_twos.watch -m agent_module`.
