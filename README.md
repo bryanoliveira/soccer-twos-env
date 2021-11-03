@@ -1,6 +1,6 @@
 # CEIA RL Soccer-Twos
 
-A Soccer-Twos ([Unity ML Agents](https://github.com/Unity-Technologies/ml-agents)) environment with multi-agent Gym-compatible wrappers and a human-friendly visualizer.
+A pre-compiled Soccer-Twos environment with multi-agent Gym-compatible wrappers and a human-friendly visualizer. Built on top of [Unity ML Agents](https://github.com/Unity-Technologies/ml-agents) to be used as final assignment for the Reinforcement Learning Minicourse at CEIA / Deep Learning Brazil.
 
 <div align="center">
     <img src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/master/images/screenshot.png" width="480"/>
