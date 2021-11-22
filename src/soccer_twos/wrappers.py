@@ -508,3 +508,39 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
             return obs[0]
         else:
             return np.concatenate((obs[0], obs[1]))
+
+
+class ContinuousActionSpaceWrapper(gym.core.Wrapper):
+    """
+    A wrapper for continuous action space environment.
+    Converts MultiDiscrete action space to Box action space.
+    """
+
+    def __init__(self, env):
+        super(ContinuousActionSpaceWrapper, self).__init__(env)
+        self.env = env
+        assert isinstance(env.action_space, gym.spaces.MultiDiscrete)
+        self.action_space = gym.spaces.Box(
+            0, 1, dtype=np.float32, shape=(len(env.action_space.nvec),)
+        )
+        self.dims = [d - 1 for d in env.action_space.nvec]
+
+    def step(self, action):
+        if type(action) is dict:
+            action = {i: self._preprocess_action(action[i]) for i in action}
+        else:
+            action = self._preprocess_action(action)
+        return self.env.step(action)
+
+    def _preprocess_action(self, action):
+        # TODO implement function such that:
+        """
+        Translates continuous actions from range [-1, 1] (where -1 is reverse
+        direction, 0 is no action, and 1 is forward direction) to (0, 1, 2)
+        discrete values, where 0 is no action, 1 is forward, and 2 is reverse.
+        """
+        # Example:
+        # return [int(round(v * d)) for v, d in zip(action, self.dims)]
+        raise NotImplementedError(
+            "ContinuousActionSpaceWrapper is not fully implemented yet"
+        )

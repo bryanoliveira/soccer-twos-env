@@ -42,7 +42,9 @@ if __name__ == "__main__":
         raise ValueError("Must specify selfplay (-m) or team (-m1, -m2) agent modules")
 
     # import agent modules
+    logging.info(f"Loading {agent1_module_name} as blue team")
     agent1_module = importlib.import_module(agent1_module_name)
+    logging.info(f"Loading {agent2_module_name} as orange team")
     agent2_module = importlib.import_module(agent2_module_name)
     # instantiate env so agents can access e.g. env.action_space.shape
     env = soccer_twos.make(base_port=args.base_port)
