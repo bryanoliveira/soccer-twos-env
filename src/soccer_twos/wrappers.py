@@ -416,7 +416,12 @@ class MultiagentTeamWrapper(gym.core.Wrapper):
                 3: action[1][self.action_space_n :],
             }
         obs, reward, done, info = self.env.step(env_action)
-        return self._preprocess_obs(obs), self._preprocess_reward(reward), done, info
+        return (
+            self._preprocess_obs(obs),
+            self._preprocess_reward(reward),
+            done,
+            self._preprocess_info(info),
+        )
 
     def reset(self):
         return self._preprocess_obs(self.env.reset())
@@ -431,6 +436,12 @@ class MultiagentTeamWrapper(gym.core.Wrapper):
         return {
             0: reward[0] + reward[1],
             1: reward[2] + reward[3],
+        }
+
+    def _preprocess_info(self, info):
+        return {
+            0: {0: info[0], 1: info[1]},
+            1: {0: info[2], 1: info[3]},
         }
 
 
