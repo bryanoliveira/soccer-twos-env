@@ -8,6 +8,8 @@ from mlagents_envs.side_channel.engine_configuration_channel import (
 
 from soccer_twos.agent_interface import AgentInterface  # expose
 from soccer_twos.package import check_package, TRAINING_ENV_PATH, ROLLOUT_ENV_PATH
+from soccer_twos.side_channels import EnvConfigurationChannel
+from soccer_twos.utils import DummyEnv
 from soccer_twos.wrappers import (
     MultiAgentUnityWrapper,
     MultiagentTeamWrapper,
@@ -15,8 +17,6 @@ from soccer_twos.wrappers import (
     EnvType,
     TerminationMode,
 )
-from soccer_twos.utils import DummyEnv
-
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
 logging.basicConfig(level=LOGLEVEL)
@@ -48,6 +48,8 @@ def make(**env_config):
             Defaults to a random agent.
         single_player: Whether to let the agent control a single player, while the other stays still.
             Only works when `variation==team_vs_policy`. Defaults to False.
+        blue_team_name: The name of the blue team. Defaults to "BLUE".
+        orange_team_name: The name of the orange team. Defaults to "ORANGE".
         uint8_visual: Return visual observations as uint8 (0-255) matrices instead of float (0.0-1.0).
         action_space_seed: If non-None, will be used to set the random seed on created gym.Space
             instances. Defaults to None.
@@ -67,10 +69,16 @@ def make(**env_config):
             env_config["env_path"] = TRAINING_ENV_PATH
 
     # set engine configs
-    channel = EngineConfigurationChannel()
-    channel.set_configuration_parameters(
+    engine_channel = EngineConfigurationChannel()
+    engine_channel.set_configuration_parameters(
         time_scale=env_config.get("time_scale", 20),  # 20x speedup
         quality_level=env_config.get("quality_level", 0),  # lowest
+    )
+    # set env configs
+    env_channel = EnvConfigurationChannel()
+    env_channel.set_env_parameters(
+        blue_team_name=env_config.get("blue_team_name"),
+        orange_team_name=env_config.get("orange_team_name"),
     )
 
     unity_env = UnityEnvironment(
@@ -78,7 +86,7 @@ def make(**env_config):
         no_graphics=not env_config.get("render", False),
         base_port=env_config.get("base_port", 50039),
         worker_id=env_config.get("worker_id", 0),
-        side_channels=[channel],
+        side_channels=[engine_channel, env_channel],
     )
 
     multiagent_config = {

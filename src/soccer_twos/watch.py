@@ -52,7 +52,14 @@ if __name__ == "__main__":
     agent2 = get_agent_class(agent2_module)(env)
     env.close()
     # setup & run
-    env = soccer_twos.make(watch=True, base_port=args.base_port)
+    logging.info(f"{agent1_module_name} name is {agent1.name}")
+    logging.info(f"{agent2_module_name} name is {agent2.name}")
+    env = soccer_twos.make(
+        watch=True,
+        base_port=args.base_port,
+        blue_team_name=agent1.name,
+        orange_team_name=agent2.name,
+    )
     obs = env.reset()
     team0_reward = 0
     team1_reward = 0

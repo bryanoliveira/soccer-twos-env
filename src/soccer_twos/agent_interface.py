@@ -5,6 +5,9 @@ import numpy as np
 
 
 class AgentInterface(abc.ABC):
+    def __init__(self):
+        self.name = "UNNAMED AGENT"
+
     @abc.abstractmethod
     def act(self, observation: Dict[int, np.ndarray]) -> Dict[int, np.ndarray]:
         """The act method is called when the agent is asked to act.
