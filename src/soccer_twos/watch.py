@@ -1,23 +1,11 @@
 import argparse
 import importlib
-import inspect
 import logging
 import os
 import sys
 
 import soccer_twos
-from soccer_twos.agent_interface import AgentInterface
-
-
-def get_agent_class(module):
-    for class_name, class_type in inspect.getmembers(module, inspect.isclass):
-        if class_name != "AgentInterface" and issubclass(class_type, AgentInterface):
-            logging.info(f"Found agent {class_name} in module {module.__name__}")
-            return class_type
-
-    raise ValueError(
-        "No AgentInterface subclass found in module {}".format(module.__name__)
-    )
+from soccer_twos.utils import get_agent_class
 
 
 if __name__ == "__main__":
@@ -25,10 +13,10 @@ if __name__ == "__main__":
     logging.basicConfig(level=LOGLEVEL)
 
     parser = argparse.ArgumentParser(description="Rollout soccer-twos.")
-    parser.add_argument("-m", "--agent-module", help="Selfplay Agent Module")
-    parser.add_argument("-m1", "--agent1-module", help="Team 1 Agent Module")
-    parser.add_argument("-m2", "--agent2-module", help="Team 2 Agent Module")
-    parser.add_argument("-p", "--base-port", type=int, help="Base Communication Port")
+    parser.add_argument("-m", "--agent-module", help="Selfplay agent module")
+    parser.add_argument("-m1", "--agent1-module", help="Team 1 agent module")
+    parser.add_argument("-m2", "--agent2-module", help="Team 2 agent module")
+    parser.add_argument("-p", "--base-port", type=int, help="Base communication port")
     args = parser.parse_args()
 
     if args.agent_module:

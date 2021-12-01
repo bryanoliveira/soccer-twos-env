@@ -1,32 +1,28 @@
 import argparse
 import importlib
-import inspect
 import logging
 import os
 import sys
 import collections
-import json
-from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
+from typing import Dict, List
 
 import numpy as np
 from ray.tune.logger import pretty_print
-from ray.tune.utils.util import SafeFallbackEncoder
 
 import soccer_twos
 from soccer_twos.agent_interface import AgentInterface
+from soccer_twos.utils import get_agent_class
 
-def get_agent_class(module):
-    for class_name, class_type in inspect.getmembers(module, inspect.isclass):
-        if class_name != "AgentInterface" and issubclass(class_type, AgentInterface):
-            logging.info(f"Found agent {class_name} in module {module.__name__}")
-            return class_type
 
-    raise ValueError(
-        "No AgentInterface subclass found in module {}".format(module.__name__)
-    )
-
-# Print iterations progress
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+def print_progress_bar(
+    iteration,
+    total,
+    prefix="",
+    suffix="",
+    length=100,
+    fill="█",
+    printEnd="\r",
+):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -34,29 +30,35 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
         total       - Required  : total iterations (Int)
         prefix      - Optional  : prefix string (Str)
         suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
         length      - Optional  : character length of bar (Int)
         fill        - Optional  : bar fill character (Str)
         printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
     """
     percent = str(iteration)
     filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {percent} {suffix}', end = printEnd)
+    bar = fill * filledLength + "-" * (length - filledLength)
+    print(f"\r{prefix} |{bar}| {percent} {suffix}", end=printEnd)
     # Print New Line on Complete
-    if iteration == total: 
+    if iteration == total:
         print()
 
+
 def collect_episodes(
-        env,
-        agent1,
-        agent2,
-        n_episodes: int = 200,
+    env,
+    agent1,
+    agent2,
+    n_episodes: int = 200,
 ) -> List[Dict]:
     """Gathers new episodes metrics from the given evaluators."""
     episodes = []
 
-    printProgressBar(0, n_episodes, prefix = 'Progress:', suffix = f'/ {n_episodes} Complete', length = 50)
+    print_progress_bar(
+        0,
+        n_episodes,
+        prefix="Progress:",
+        suffix=f"/ {n_episodes} episodes completed",
+        length=50,
+    )
     for i in range(n_episodes):
         obs = env.reset()
         if i % 2 == 0:
@@ -72,7 +74,7 @@ def collect_episodes(
         episode_done = False
         blue_team_reward = 0
         orange_team_reward = 0
-        
+
         while not episode_done:
             blue_team_actions = team_order[0].act({0: obs[0], 1: obs[1]})
             orange_team_actions = team_order[1].act({0: obs[2], 1: obs[3]})
@@ -92,24 +94,34 @@ def collect_episodes(
             orange_team_reward = reward[2] + reward[3]
             if max(done.values()):  # if any agent is done
                 episode_done = True
-        
-        episodes.append({
-            "episode_length": steps,
-            "agent_1_reward": blue_team_reward if team_agent_1 == "blue_team" else orange_team_reward,
-            "agent_2_reward": blue_team_reward if team_agent_2 == "blue_team" else orange_team_reward,
-            "team_agent_1": team_agent_1,
-            "team_agent_2": team_agent_2
-        })
 
-        printProgressBar(i+1, n_episodes, prefix = 'Progress:', suffix = f'/ {n_episodes} Complete', length = 50)
-        
+        episodes.append(
+            {
+                "episode_length": steps,
+                "agent_1_reward": blue_team_reward
+                if team_agent_1 == "blue_team"
+                else orange_team_reward,
+                "agent_2_reward": blue_team_reward
+                if team_agent_2 == "blue_team"
+                else orange_team_reward,
+                "team_agent_1": team_agent_1,
+                "team_agent_2": team_agent_2,
+            }
+        )
+
+        print_progress_bar(
+            i + 1,
+            n_episodes,
+            prefix="Progress:",
+            suffix=f"/ {n_episodes} episodes completed",
+            length=50,
+        )
+
     return episodes
 
 
 def summarize_episodes(
-    episodes: List[Dict],
-    agent_1_name: str,
-    agent_2_name: str
+    episodes: List[Dict], agent_1_name: str, agent_2_name: str
 ) -> Dict:
     """Summarizes a set of episode metrics.
 
@@ -119,24 +131,21 @@ def summarize_episodes(
         agent_2_name: Second agent name
     """
 
-
     episode_lengths = []
     episode_rewards = []
     hist_stats = {
-            agent_name: {
-                    "rewards": [],
-                    "blue_team": collections.defaultdict(list),
-                    "orange_team": collections.defaultdict(list),
-            }
-            for agent_name in (agent_1_name, agent_2_name)
+        agent_name: {
+            "rewards": [],
+            "blue_team": collections.defaultdict(list),
+            "orange_team": collections.defaultdict(list),
         }
-
-
+        for agent_name in (agent_1_name, agent_2_name)
+    }
 
     for episode in episodes:
         episode_lengths.append(episode["episode_length"])
         episode_rewards.append(episode["agent_1_reward"] + episode["agent_2_reward"])
-        
+
         for agent_id, agent_name in [(1, agent_1_name), (2, agent_2_name)]:
             team = episode[f"team_agent_{agent_id}"]
             reward = episode[f"agent_{agent_id}_reward"]
@@ -179,7 +188,7 @@ def summarize_episodes(
             f"policy_wins": total_results.count(1),
             f"policy_losses": total_results.count(-1),
             f"policy_draws": total_results.count(0),
-            f"policy_win_rate": total_results.count(1)/len(total_rewards)
+            f"policy_win_rate": total_results.count(1) / len(total_rewards),
         }
         for team in ("blue_team", "orange_team"):
             team_rewards = hist_stats[agent_name][team]["rewards"]
@@ -199,7 +208,7 @@ def summarize_episodes(
                 f"policy_{team}_wins": team_results.count(1),
                 f"policy_{team}_losses": team_results.count(-1),
                 f"policy_{team}_draws": team_results.count(0),
-                f"policy_{team}_win_rate": team_results.count(1)/len(team_rewards)
+                f"policy_{team}_win_rate": team_results.count(1) / len(team_rewards),
             }
 
     return dict(
@@ -209,14 +218,15 @@ def summarize_episodes(
         episode_len_mean=avg_length,
         episodes_this_eval=len(episodes),
         policies=policies,
-        hist_stats=dict(hist_stats))
+        hist_stats=dict(hist_stats),
+    )
 
-def load_agent(agent_module_name: str, base_port = None) -> AgentInterface:
+
+def load_agent(agent_module_name: str, base_port=None) -> AgentInterface:
     """Loads a AgentInterface based on his module name"""
 
-    agent_module = importlib.import_module(agent_module_name)
-
     env = soccer_twos.make(base_port=base_port)
+    agent_module = importlib.import_module(agent_module_name)
     agent = get_agent_class(agent_module)(env)
     env.close()
 
@@ -225,16 +235,11 @@ def load_agent(agent_module_name: str, base_port = None) -> AgentInterface:
 
 def evaluate(
     agent1_module_name: str,
-    agent2_module_name: str = None,
-    n_episodes: int = 200,
-    base_port = None
+    agent2_module_name: str,
+    n_episodes: int = 100,
+    base_port=None,
 ) -> Dict:
     """Evaluates two agents against each other"""
-
-    if agent2_module_name is None:
-        agent2_module_name = agent1_module_name
-    else:
-        agent2_module_name = agent2_module_name
 
     agent1 = load_agent(agent1_module_name, base_port=base_port)
     agent2 = load_agent(agent2_module_name, base_port=base_port)
@@ -242,28 +247,25 @@ def evaluate(
     env = soccer_twos.make(
         base_port=base_port,
     )
-    
+
     episodes_data = collect_episodes(env, agent1, agent2, n_episodes)
 
     env.close()
 
-    result = summarize_episodes(episodes_data, agent1_module_name, agent2_module_name)
-
-    #with open('evaluation.json', 'w') as f:
-    #    json.dump(result, f, cls=SafeFallbackEncoder)
-    
-    return result
+    return summarize_episodes(episodes_data, agent1_module_name, agent2_module_name)
 
 
 if __name__ == "__main__":
     LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
     logging.basicConfig(level=LOGLEVEL)
 
-    parser = argparse.ArgumentParser(description="Evaluation script soccer-twos.")
-    parser.add_argument("-m", "--agent-module", help="Selfplay Agent Module")
-    parser.add_argument("-m1", "--agent1-module", help="Team 1 Agent Module")
-    parser.add_argument("-m2", "--agent2-module", help="Team 2 Agent Module")
-    parser.add_argument("-e", "--episodes", type=int, default=200, help="Number of Episodes to Evaluate")
+    parser = argparse.ArgumentParser(description="Evaluation script for soccer-twos.")
+    parser.add_argument("-m", "--agent-module", help="Selfplay agent module")
+    parser.add_argument("-m1", "--agent1-module", help="Team 1 agent module")
+    parser.add_argument("-m2", "--agent2-module", help="Team 2 agent module")
+    parser.add_argument(
+        "-e", "--episodes", type=int, default=200, help="Number of Episodes to Evaluate"
+    )
     parser.add_argument("-p", "--base-port", type=int, help="Base Communication Port")
     args = parser.parse_args()
 
@@ -280,9 +282,11 @@ if __name__ == "__main__":
     # import agent modules
     logging.info(f"Loading {agent1_module_name}")
     logging.info(f"Loading {agent2_module_name}")
-    logging.info(f"Number of Episodes to Evaluate {args.episodes}")
-    logging.info(f"Base Communication Port {args.base_port}")
+    logging.info(f"Number of episodes to evaluate: {args.episodes}")
+    logging.info(f"Base communication port: {args.base_port}")
 
-    result = evaluate(agent1_module_name, agent2_module_name, args.episodes, args.base_port)
+    result = evaluate(
+        agent1_module_name, agent2_module_name, args.episodes, args.base_port
+    )
 
     print(pretty_print(result))
