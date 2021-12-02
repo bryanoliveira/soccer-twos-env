@@ -12,22 +12,6 @@ from mlagents_envs.side_channel.side_channel import (
 import numpy as np
 
 
-def get_simulation_agent_id(gym_agent_id: int) -> int:
-    """
-    Simulation uses IDs that alternate teams,
-    but the wrappers groups them sequentially.
-    We need to convert between the two.
-    """
-    # TODO: use the same indexing as in the simulation to avoid this
-    mapping = {
-        0: 0,
-        1: 2,
-        2: 1,
-        3: 3,
-    }
-    return mapping[gym_agent_id]
-
-
 class EnvConfigurationChannel(SideChannel):
     class ConfigurationType(IntEnum):
         BLUE_TEAM_NAME = 0
@@ -73,21 +57,21 @@ class EnvConfigurationChannel(SideChannel):
                 if "position" in players_states[agent_id]:
                     msg = OutgoingMessage()
                     msg.write_int32(self.ConfigurationType.PLAYER_POSITION)
-                    msg.write_int32(get_simulation_agent_id(agent_id))
+                    msg.write_int32(agent_id)
                     msg.write_float32_list(players_states[agent_id]["position"])
                     super().queue_message_to_send(msg)
 
                 if "velocity" in players_states[agent_id]:
                     msg = OutgoingMessage()
                     msg.write_int32(self.ConfigurationType.PLAYER_VELOCITY)
-                    msg.write_int32(get_simulation_agent_id(agent_id))
+                    msg.write_int32(agent_id)
                     msg.write_float32_list(players_states[agent_id]["velocity"])
                     super().queue_message_to_send(msg)
 
                 if "rotation_y" in players_states[agent_id]:
                     msg = OutgoingMessage()
                     msg.write_int32(self.ConfigurationType.PLAYER_ROTATION)
-                    msg.write_int32(get_simulation_agent_id(agent_id))
+                    msg.write_int32(agent_id)
                     msg.write_float32(players_states[agent_id]["rotation_y"])
                     super().queue_message_to_send(msg)
 

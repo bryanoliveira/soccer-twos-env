@@ -229,8 +229,8 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
             num_group_members = len(action) // self.num_groups
             for group_id in range(self.num_groups):
                 group_actions = []
-                for i in range(num_group_members):
-                    group_actions.append(action[group_id * num_group_members + i])
+                for member_id in range(num_group_members):
+                    group_actions.append(action[member_id * self.num_groups + group_id])
                 self._set_action(group_actions, self.group_prefix + str(group_id))
         else:
             self._set_action(action, self.name)
@@ -246,9 +246,10 @@ class MultiAgentUnityWrapper(UnityToGymWrapper):
             for group_id in range(self.num_groups):
                 o, r, d, i = self._get_step_results(self.group_prefix + str(group_id))
                 for member_id in o:
-                    obs_dict[group_id * len(o) + member_id] = o[member_id]
-                    rew_dict[group_id * len(o) + member_id] = r[member_id]
-                    info_dict[group_id * len(o) + member_id] = i[member_id]
+                    # alternate agent groups (teams) to support variable team size
+                    obs_dict[member_id * self.num_groups + group_id] = o[member_id]
+                    rew_dict[member_id * self.num_groups + group_id] = r[member_id]
+                    info_dict[member_id * self.num_groups + group_id] = i[member_id]
                 # done uses team-wise info
                 done = done or d
             done_dict = {"__all__": done}
@@ -399,21 +400,17 @@ class MultiagentTeamWrapper(gym.core.Wrapper):
     def step(self, action):
         if isinstance(self.action_space, gym.spaces.Discrete):
             env_action = {
-                # actions for team 1
-                0: action[0] // self.action_space_n,
-                1: action[0] % self.action_space_n,
-                # actions for team 2
-                2: action[1] // self.action_space_n,
-                3: action[1] % self.action_space_n,
+                0: action[0] // self.action_space_n,  # team0 agent0
+                1: action[1] // self.action_space_n,  # team1 agent0
+                2: action[0] % self.action_space_n,  # team0 agent1
+                3: action[1] % self.action_space_n,  # team1 agent1
             }
         else:
             env_action = {
-                # slice actions for team 1
-                0: action[0][: self.action_space_n],
-                1: action[0][self.action_space_n :],
-                # slice actions for team 2
-                2: action[1][: self.action_space_n],
-                3: action[1][self.action_space_n :],
+                0: action[0][: self.action_space_n],  # team0 agent0
+                1: action[1][: self.action_space_n],  # team1 agent0
+                2: action[0][self.action_space_n :],  # team0 agent1
+                3: action[1][self.action_space_n :],  # team1 agent1
             }
         obs, reward, done, info = self.env.step(env_action)
         return (
@@ -428,20 +425,20 @@ class MultiagentTeamWrapper(gym.core.Wrapper):
 
     def _preprocess_obs(self, obs):
         return {
-            0: np.concatenate((obs[0], obs[1])),
-            1: np.concatenate((obs[2], obs[3])),
+            0: np.concatenate((obs[0], obs[2])),
+            1: np.concatenate((obs[1], obs[3])),
         }
 
     def _preprocess_reward(self, reward):
         return {
-            0: reward[0] + reward[1],
-            1: reward[2] + reward[3],
+            0: reward[0] + reward[2],
+            1: reward[1] + reward[3],
         }
 
     def _preprocess_info(self, info):
         return {
-            0: {0: info[0], 1: info[1]},
-            1: {0: info[2], 1: info[3]},
+            0: {0: info[0], 1: info[2]},
+            1: {0: info[1], 1: info[3]},
         }
 
 
@@ -487,27 +484,27 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
     def step(self, action):
         env_action = {
             # actions for team 2
-            2: self.opponent(self.last_obs[2]),
+            1: self.opponent(self.last_obs[1]),
             3: self.opponent(self.last_obs[3]),
         }
         if isinstance(self.action_space, gym.spaces.Discrete):
             if self.single_player:
                 env_action[0] = action
-                env_action[1] = 0
+                env_action[2] = 0
             else:
                 env_action[0] = action // self.action_space_n
-                env_action[1] = action % self.action_space_n
+                env_action[2] = action % self.action_space_n
         else:
             env_action[0] = action[: self.action_space_n]
-            env_action[1] = action[self.action_space_n :]
+            env_action[2] = action[self.action_space_n :]
 
         obs, reward, done, info = self.env.step(env_action)
 
         return (
             self._preprocess_obs(obs),
-            reward[0] + reward[1],
+            reward[0] + reward[2],
             done["__all__"],
-            info[0],
+            info[0] if self.single_player else {0: info[0], 1: info[2]},
         )
 
     def reset(self):
@@ -518,7 +515,7 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
         if self.single_player:
             return obs[0]
         else:
-            return np.concatenate((obs[0], obs[1]))
+            return np.concatenate((obs[0], obs[2]))
 
 
 class ContinuousActionSpaceWrapper(gym.core.Wrapper):
