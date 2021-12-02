@@ -54,6 +54,11 @@ class EnvConfigurationChannel(SideChannel):
 
         if players_states is not None:
             for agent_id in players_states:
+                assert (
+                    "position" in players_states[agent_id]
+                    or "velocity" in players_states[agent_id]
+                ), "Player state must contain position and/or velocity"
+
                 if "position" in players_states[agent_id]:
                     msg = OutgoingMessage()
                     msg.write_int32(self.ConfigurationType.PLAYER_POSITION)
@@ -68,7 +73,7 @@ class EnvConfigurationChannel(SideChannel):
                     msg.write_float32_list(players_states[agent_id]["velocity"])
                     super().queue_message_to_send(msg)
 
-                if "rotation_y" in players_states[agent_id]:
+                if "rotation" in players_states[agent_id]:
                     msg = OutgoingMessage()
                     msg.write_int32(self.ConfigurationType.PLAYER_ROTATION)
                     msg.write_int32(agent_id)
@@ -76,6 +81,10 @@ class EnvConfigurationChannel(SideChannel):
                     super().queue_message_to_send(msg)
 
         if ball_state is not None:
+            assert (
+                "position" in ball_state or "velocity" in ball_state
+            ), "Ball state must contain position and/or velocity"
+
             if "position" in ball_state:
                 msg = OutgoingMessage()
                 msg.write_int32(self.ConfigurationType.BALL_POSITION)
