@@ -50,6 +50,7 @@ def make(**env_config):
             Only works when `variation==team_vs_policy`. Defaults to False.
         blue_team_name: The name of the blue team. Defaults to "BLUE".
         orange_team_name: The name of the orange team. Defaults to "ORANGE".
+        env_channel: The side channel to use for communication with the environment. Defaults to None.
         uint8_visual: Return visual observations as uint8 (0-255) matrices instead of float (0.0-1.0).
         action_space_seed: If non-None, will be used to set the random seed on created gym.Space
             instances. Defaults to None.
@@ -75,8 +76,11 @@ def make(**env_config):
         quality_level=env_config.get("quality_level", 0),  # lowest
     )
     # set env configs
-    env_channel = EnvConfigurationChannel()
-    env_channel.set_env_parameters(
+    if env_config.get("env_channel"):
+        env_channel = env_config.get("env_channel")
+    else:
+        env_channel = EnvConfigurationChannel()
+    env_channel.set_parameters(
         blue_team_name=env_config.get("blue_team_name"),
         orange_team_name=env_config.get("orange_team_name"),
     )
