@@ -32,8 +32,9 @@ The `make` method accepts several options:
 | `render`           | Whether to render the environment. Defaults to `False`.                                                                                                                                                                 |
 | `watch`            | Whether to run an audience-friendly version the provided Soccer-Twos environment. Forces `render` to `True`, `time_scale` to `1` and `quality_level` to `5`. Has no effect when `env_path` is set. Defaults to `False`. |
 | `variation`        | A soccer env variation in EnvType. Defaults to `EnvType.multiagent_player`                                                                                                                                              |
-| `blue_team_name` | The name of the blue team. Defaults to "BLUE". |
-| `orange_team_name` | The name of the orange team. Defaults to "ORANGE". |
+| `blue_team_name`   | The name of the blue team. Defaults to "BLUE".                                                                                                                                                                          |
+| `orange_team_name` | The name of the orange team. Defaults to "ORANGE".                                                                                                                                                                      |
+| `env_channel`      | The side channel to use for communication with the environment. Defaults to None.                                                                                                                                       |
 | `time_scale`       | The time scale to use for the environment. This should be less than `100`x for better simulation accuracy. Defaults to `20`x realtime.                                                                                  |
 | `quality_level`    | The quality level to use when rendering the environment. Ranges between `0` (lowest) and `5` (highest). Defaults to `0`.                                                                                                |
 | `base_port`        | The base port to use to communicate with the environment. Defaults to `50039`.                                                                                                                                          |
@@ -46,7 +47,7 @@ The `make` method accepts several options:
 The created `env` exposes a basic [Gym](https://gym.openai.com/) interface.
 Namely, the methods `reset()`, `step(action: Dict[int, np.ndarray])` and `close()` are available.
 The `render()` method has currently no effect and `soccer_twos.make(render=True)` should be used instead.
-The `step()` method returns extra information about the player and the ball in the last tuple element.
+The `step()` method returns extra information about the player and the ball in the last tuple element. This extra information includes position (x, y) and velocity (x, y) for the ball and players and y rotation (in degrees) of the players.
 This information may be used to build custom reward functions if needed.
 
 We expose an RLLib-compatible multiagent interface.
@@ -85,11 +86,42 @@ while True:
         env.reset()
 ```
 
+#### Environment State Configuration
+
+The `env_channel` parameter allows for state configuration inside the simulation. To use it, you must first instantiate a `soccer_twos.side_channels.EnvConfigurationChannel` and pass it in the `soccer_twos.make` call. Here's a full example:
+
+```
+import soccer_twos
+from soccer_twos.side_channels import EnvConfigurationChannel
+
+env_channel = EnvConfigurationChannel()
+env = soccer_twos.make(env_channel=env_channel)
+env.reset()
+
+env_channel.set_parameters(
+    ball_state={
+        "position": [1, -1],
+        "velocity": [-1.2, 3],
+    },
+    players_states={
+        3: {
+            "position": [-5, 10],
+            "rotation_y": 45,
+            "velocity": [5, 0],
+        }
+    }
+)
+
+# env.step()
+```
+
+All the `env_channel.set_parameters` method parameters and dict keys are optional. You can set a single parameter at a time or the full game state if you need so.
+
 ### Evaluating
 
 To quickly evaluate one agent against another and generate comprehensive statistics, you may use the `evaluate` script:
 
-```python -m soccer_twos.evaluate -m1 agent_module -m2 opponent_module```
+`python -m soccer_twos.evaluate -m1 agent_module -m2 opponent_module`
 
 You can also provide the `--episodes` option to specify the number of episodes to evaluate on (defaults to 100).
 
@@ -97,7 +129,7 @@ You can also provide the `--episodes` option to specify the number of episodes t
 
 To rollout via CLI, you must create an implementation (subclass) of `soccer_twos.AgentInterface` and run:
 
-```python -m soccer_twos.watch -m agent_module```
+`python -m soccer_twos.watch -m agent_module`
 
 This will run a human-friendly version of the environment, where your agent will play against itself.
 You may instead use the options `-m1 agent_module -m2 opponent_module` to play against a different opponent.
