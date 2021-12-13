@@ -19,7 +19,7 @@ See [requirements.txt](https://github.com/bryanoliveira/soccer-twos-env/blob/mas
 
 Import this package and instantiate the environment:
 
-```
+```python
 import soccer_twos
 
 env = soccer_twos.make()
@@ -57,7 +57,7 @@ Agents 0 and 1 correspond to the blue team and agents 2 and 3 correspond to the 
 
 Here's a full example:
 
-```
+```python
 import soccer_twos
 
 env = soccer_twos.make(render=True)
@@ -89,7 +89,7 @@ while True:
 
 The `env_channel` parameter allows for state configuration inside the simulation. To use it, you must first instantiate a `soccer_twos.side_channels.EnvConfigurationChannel` and pass it in the `soccer_twos.make` call. Here's a full example:
 
-```
+```python
 import soccer_twos
 from soccer_twos.side_channels import EnvConfigurationChannel
 env_channel = EnvConfigurationChannel()
