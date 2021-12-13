@@ -3,7 +3,7 @@
 A pre-compiled [Soccer-Twos](https://github.com/Unity-Technologies/ml-agents/blob/92ff2c26fef7174b443115454fa1c6045d622bc2/docs/Learning-Environment-Examples.md#soccer-twos) environment with multi-agent Gym-compatible wrappers and a human-friendly visualizer. Built on top of [Unity ML Agents](https://github.com/Unity-Technologies/ml-agents) to be used as final assignment for the Reinforcement Learning Minicourse at CEIA / Deep Learning Brazil.
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/master/images/screenshot.png" width="480"/>
+    <img class="text-img mw-100" src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/master/images/soccer.gif">
 </div>
 <br/>
 
@@ -130,6 +130,10 @@ To rollout via CLI, you must create an implementation (subclass) of `soccer_twos
 This will run a human-friendly version of the environment, where your agent will play against itself.
 You may instead use the options `-m1 agent_module -m2 opponent_module` to play against a different opponent.
 You may also implement your own rollout script using `soccer_twos.make(watch=True)`.
+
+<div align="center">
+    <img src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/master/images/screenshot.png" width="480"/>
+</div>
 
 ## Environment Specs
 
