@@ -452,7 +452,13 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
     Uses a 2x2 (4 players) environment to expose a 1x1 (2 teams) environment.
     """
 
-    def __init__(self, env, opponent: Callable = None, single_player: bool = False):
+    def __init__(
+        self,
+        env,
+        opponent_policy: Callable = None,
+        teammate_policy: Callable = None,
+        single_player: bool = False,
+    ):
         super(TeamVsPolicyWrapper, self).__init__(env)
         self.env = env
         self.single_player = single_player
@@ -478,22 +484,28 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
             )
             self.action_space_n = len(env.action_space.nvec)
 
-        if opponent is None:
-            # a function that returns random actions no matter the input
-            self.opponent = lambda *_: self.env.action_space.sample()
+        if teammate_policy is None:
+            # a function that returns an action to stay still no matter the input
+            self.teammate_policy = lambda *_: 0
         else:
-            self.opponent = opponent
+            self.teammate_policy = teammate_policy
+
+        if opponent_policy is None:
+            # a function that returns random actions no matter the input
+            self.opponent_policy = lambda *_: self.env.action_space.sample()
+        else:
+            self.opponent_policy = opponent_policy
 
     def step(self, action):
         env_action = {
             # actions for team 2
-            2: self.opponent(self.last_obs[2]),
-            3: self.opponent(self.last_obs[3]),
+            2: self.opponent_policy(self.last_obs[2]),
+            3: self.opponent_policy(self.last_obs[3]),
         }
         if isinstance(self.action_space, gym.spaces.Discrete):
             if self.single_player:
                 env_action[0] = action
-                env_action[1] = 0
+                env_action[1] = self.teammate_policy(self.last_obs[1])
             else:
                 env_action[0] = action // self.action_space_n
                 env_action[1] = action % self.action_space_n
@@ -519,6 +531,16 @@ class TeamVsPolicyWrapper(gym.core.Wrapper):
             return obs[0]
         else:
             return np.concatenate((obs[0], obs[1]))
+
+    def set_opponent_policy(self, opponent_policy):
+        self.opponent_policy = opponent_policy
+
+    def set_teammate_policy(self, teammate_policy):
+        self.teammate_policy = teammate_policy
+
+    def set_policies(self, policy):
+        self.set_opponent_policy(policy)
+        self.set_teammate_policy(policy)
 
 
 class ContinuousActionSpaceWrapper(gym.core.Wrapper):
@@ -555,3 +577,9 @@ class ContinuousActionSpaceWrapper(gym.core.Wrapper):
         raise NotImplementedError(
             "ContinuousActionSpaceWrapper is not fully implemented yet"
         )
+
+
+class EnvChannelWrapper(gym.core.Wrapper):
+    def __init__(self, env, env_channel):
+        super().__init__(env)
+        self.env_channel = env_channel

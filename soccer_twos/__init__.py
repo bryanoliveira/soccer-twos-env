@@ -16,6 +16,7 @@ from soccer_twos.wrappers import (
     TeamVsPolicyWrapper,
     EnvType,
     TerminationMode,
+    EnvChannelWrapper,
 )
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
@@ -107,13 +108,13 @@ def make(**env_config):
 
     if "variation" in env_config:
         if EnvType(env_config["variation"]) is EnvType.multiagent_player:
-            return env
+            pass
         elif EnvType(env_config["variation"]) is EnvType.multiagent_team:
-            return MultiagentTeamWrapper(env)
+            env = MultiagentTeamWrapper(env)
         elif EnvType(env_config["variation"]) is EnvType.team_vs_policy:
-            return TeamVsPolicyWrapper(
+            env = TeamVsPolicyWrapper(
                 env,
-                opponent=env_config["opponent_policy"]
+                opponent_policy=env_config["opponent_policy"]
                 if "opponent_policy" in env_config
                 else None,
                 single_player=env_config["single_player"]
@@ -127,4 +128,6 @@ def make(**env_config):
                 + ". Received "
                 + env_config["variation"]
             )
+
+    env = EnvChannelWrapper(env, env_channel)
     return env

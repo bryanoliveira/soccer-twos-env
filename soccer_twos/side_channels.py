@@ -84,6 +84,7 @@ class EnvConfigurationChannel(SideChannel):
                     msg.write_float32_list(players_states[agent_id]["velocity"])
                     super().queue_message_to_send(msg)
 
+                # degrees
                 if "rotation_y" in players_states[agent_id]:
                     msg = OutgoingMessage()
                     msg.write_int32(self.ConfigurationType.PLAYER_ROTATION)
