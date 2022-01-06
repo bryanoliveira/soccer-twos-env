@@ -151,3 +151,17 @@ This environment is based on Unity ML Agents' [Soccer Twos](https://github.com/U
   - `-1`: when ball enters team's goal.
 
 Note that while this is true when `variation == EnvType.multiagent_player`, observation and action spaces may vary for other variations.
+
+## Citation
+
+```bibtex
+@misc{soccertwos,
+  author = {Bryan Oliveira},
+  title = {A pre-compiled Soccer-Twos reinforcement learning environment with multi-agent Gym-compatible wrappers and human-friendly visualizers.},
+  year = {2021},
+  publisher = {GitHub},
+  journal = {GitHub Repository},
+  howpublished = {\url{https://github.com/bryanoliveira/soccer-twos-env}}
+}
+```
+
