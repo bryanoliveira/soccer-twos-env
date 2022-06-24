@@ -3,7 +3,7 @@
 A pre-compiled [Soccer-Twos](https://github.com/Unity-Technologies/ml-agents/blob/92ff2c26fef7174b443115454fa1c6045d622bc2/docs/Learning-Environment-Examples.md#soccer-twos) environment with multi-agent Gym-compatible wrappers and a human-friendly visualizer. Built on top of [Unity ML Agents](https://github.com/Unity-Technologies/ml-agents) to be used as final assignment for the Reinforcement Learning Minicourse at CEIA / Deep Learning Brazil.
 
 <div align="center">
-    <img class="text-img mw-100" src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/master/images/soccer.gif">
+    <img class="text-img mw-100" src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/main/images/soccer.gif">
 </div>
 <br/>
 
@@ -11,7 +11,7 @@ Pre-compiled versions of this environment are available for Linux, Windows and M
 
 ## Requirements
 
-See [requirements.txt](https://github.com/bryanoliveira/soccer-twos-env/blob/master/requirements.txt).
+See [requirements.txt](https://github.com/bryanoliveira/soccer-twos-env/blob/main/requirements.txt).
 
 ## Usage
 
@@ -132,7 +132,7 @@ You may instead use the options `-m1 agent_module -m2 opponent_module` to play a
 You may also implement your own rollout script using `soccer_twos.make(watch=True)`.
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/master/images/screenshot.png" width="480"/>
+    <img src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/main/images/screenshot.png" width="480"/>
 </div>
 
 ## Environment Specs
@@ -140,7 +140,7 @@ You may also implement your own rollout script using `soccer_twos.make(watch=Tru
 This environment is based on Unity ML Agents' [Soccer Twos](https://github.com/Unity-Technologies/ml-agents/blob/92ff2c26fef7174b443115454fa1c6045d622bc2/docs/Learning-Environment-Examples.md#soccer-twos), so most of the specs are the same. Here, four agents compete in a 2 vs 2 toy soccer game, aiming to get the ball into the opponent's goal while preventing the ball from entering own goal.
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/master/images/obs.png" width="480"/>
+    <img src="https://raw.githubusercontent.com/bryanoliveira/soccer-twos-env/main/images/obs.png" width="480"/>
 </div>
 <br/>
 
