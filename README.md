@@ -11,7 +11,7 @@ Pre-compiled versions of this environment are available for Linux, Windows and M
 
 ## Install
 
-On a Python 3 environment, run:
+On a Python 3.6+ environment, run:
 
 `pip install soccer-twos`
 
