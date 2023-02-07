@@ -9,6 +9,12 @@ A pre-compiled [Soccer-Twos](https://github.com/Unity-Technologies/ml-agents/blo
 
 Pre-compiled versions of this environment are available for Linux, Windows and MacOS (x86, 64 bits). The source code for this environment is available [here](https://github.com/bryanoliveira/unity-soccer). Example agent training procedures are available [here](https://github.com/bryanoliveira/ceia-rl-tournament-starter).
 
+## Install
+
+On a Python 3 environment, run:
+
+`pip install soccer-twos`
+
 ## Requirements
 
 See [requirements.txt](https://github.com/bryanoliveira/soccer-twos-env/blob/main/requirements.txt).
